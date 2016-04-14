@@ -51,4 +51,29 @@ If you need more compress / extract functions or formats,https://github.com/hzy3
 * Email: [hzy3774@qq.com](mailto:hzy3774@qq.com)
 
 
+解决android x86 编译不过的问题，修改CpuArch.c文件的MyCPUID接口：
+把：
+  __asm__ __volatile__ (
+    "cpuid"
+    : "=a" (*a) ,
+      "=b" (*b) ,
+      "=c" (*c) ,
+      "=d" (*d)
+    : "0" (function)) ;
+修改为：
+__asm__ __volatile__ (
+  #if defined(MY_CPU_X86) && defined(__PIC__)
+    "mov %%ebx, %%edi;"
+    "cpuid;"
+    "xchgl %%ebx, %%edi;"
+    : "=a" (*a) ,
+      "=D" (*b) ,
+  #else
+    "cpuid"
+    : "=a" (*a) ,
+      "=b" (*b) ,
+  #endif
+      "=c" (*c) ,
+      "=d" (*d)
+    : "0" (function)) ;
 
